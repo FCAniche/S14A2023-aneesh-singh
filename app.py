@@ -1,5 +1,5 @@
 from markupsafe import escape
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from flask import Flask
 
 app = Flask(__name__)
@@ -10,18 +10,7 @@ def hello():
     return '<h1>Hello World! Welcome to S14A2023</h1>'
 
 @app.route('/datetime/')
-def about():
-    return '<h3>Server datetime: {}</h3>'.format(str(datetime.now()))
-
-@app.route('/capitalize/<word>/')
-def capitalize(word):
-    return '<h1>{}</h1>'.format(escape(word.capitalize()))
-
-@app.route('/add/<int:n1>/<int:n2>/')
-def add(n1, n2):
-    return '<h1>{}</h1>'.format(n1 + n2)
-
-@app.route('/users/<int:user_id>/')
-def greet_user(user_id):
-    users = ['Bob', 'Jane', 'Adam']
-    return '<h2>Hi {}</h2>'.format(users[user_id])
+def dt():
+    cst_offset = timedelta(hours=-5)
+    return '<h3>Server datetime: {}<br>UTC datetime: {}<br> Aneesh\'s (Dallas, TX) datetime: {}</h3>'.format(
+        str(datetime.now()), str(datetime.now(timezone.utc)), str((datetime.now(timezone.utc) + cst_offset)))
