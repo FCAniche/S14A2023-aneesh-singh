@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Orders</title>
+</head>
+<body>
+    <h1>User Orders</h1>
+    {% if orders %}
+        <table>
+            <tr>
+                <th>Order ID</th>
+                <th>Item Name</th>
+                <th>Item Count</th>
+                <th>Total</th>
+            </tr>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.item_name }}</td>
+                <td>{{ order.item_count }}</td>
+                <td>{{ order.total }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No orders found for this user.</p>
+    {% endif %}
+</body>
+</html>

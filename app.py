@@ -1,58 +1,78 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
+from datetime import datetime
 
 app = Flask(__name__)
+db_uri = "mysql+mysqlconnector://doadmin:AVNS_2waddAANZi9WJGnxFuM@db-mysql-nyc1-63445-do-user-14322151-0.b.db.ondigitalocean.com:25060/defaultdb"
+app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+db = SQLAlchemy(app)
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    phone_number = db.Column(db.String(255))
+    updated_at = db.Column(db.DateTime)
+    status = db.Column(db.Integer)
+    is_admin = db.Column(db.Boolean)
+
+class Order(db.Model):
+    __tablename__ = 'orders'
+    id = db.Column(db.Integer, primary_key=True)
+    item_name = db.Column(db.String(255))
+    item_count = db.Column(db.Integer)
+    total = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # Add foreign key relationship to 'users' table
+    user = db.relationship('User', backref=db.backref('orders', lazy=True))
 
 @app.route('/')
-@app.route('/home')
-def home():
-    return render_template('home.html')
+def index():
+    users = User.query.all()
+    return render_template('index.html', users=users)
 
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
-@app.route('/list')
-def list():
-    # Fill data for List page
-    data = []
-    current_dict = {}
-
-    with open('data.txt', 'r') as file:
-        for line in file:
-            line = line.strip()
-            if line:
-                if 'name' not in current_dict:
-                    current_dict['name'] = line
-                else:
-                    current_dict['email'] = line
-                    data.append(current_dict)
-                    current_dict = {}
-    return render_template('list.html', data=data)
-
-@app.route('/contact', methods=['GET', 'POST'])
-def contact():
+@app.route('/adduser', methods=['GET', 'POST'])
+def add_user():
     if request.method == 'POST':
         email = request.form['email']
-        message = request.form['message']
-        # Process the form data (e.g., send an email)
-        # Print data to log (for now)
-        print('Email:', email)
-        print('Message:', message)
-        return redirect('/')
-    return render_template('contact.html')
+        phone_number = request.form['phone_number']
+        # Add other form fields as needed
+        new_user = User(
+            email=email, 
+            phone_number=phone_number, 
+            updated_at=datetime.utcnow())
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for('index'))
+    return render_template('add_user.html')
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
+@app.route('/updateuser/<int:user_id>', methods=['GET', 'POST'])
+def update_user(user_id):
+    user = User.query.get_or_404(user_id)
     if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        # Process the form data (e.g., register for website)
-        # Save it to data file
-        with open('data.txt', 'a') as file:
-            file.write(name + '\n')
-            file.write(email + '\n')
-        return redirect('/')
-    return render_template('registration.html')
+        user.email = request.form['email']
+        user.phone_number = request.form['phone_number']
+        user.updated_at = datetime.utcnow()
+        # Update other columns as needed
+        db.session.commit()
+        return redirect(url_for('index'))
+    return render_template('update_user.html', user=user)
+
+@app.route('/deleteuser/<int:user_id>', methods=['POST'])
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    return redirect(url_for('index'))
+
+@app.route('/orders', methods=['GET'])
+def orders():
+    user_id = request.args.get('user_id')  # Get the user ID from the query string
+    if user_id:
+        orders = Order.query.filter_by(user_id=user_id).all()
+        return render_template('orders.html', orders=orders)
+    return "No orders found for this user."
 
 if __name__ == '__main__':
+    db.create_all()
     app.run(debug=True)

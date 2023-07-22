@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update User</title>
+</head>
+<body>
+    <h1>Update User</h1>
+    <form method="post" action="{{ url_for('update_user', user_id=user.id) }}">
+        <label for="email">Email:</label>
+        <input type="text" name="email" id="email" value="{{ user.email }}" required><br>
+
+        <label for="phone_number">Phone Number:</label>
+        <input type="text" name="phone_number" id="phone_number" value="{{ user.phone_number }}" required><br>
+
+        <!-- Update other form fields as needed -->
+
+        <input type="submit" value="Update User">
+    </form>
+    <a href="{{ url_for('index') }}">Cancel</a>
+</body>
+</html>

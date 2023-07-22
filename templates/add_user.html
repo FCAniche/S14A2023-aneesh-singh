@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add User</title>
+</head>
+<body>
+    <h1>Add User</h1>
+    <form method="post" action="{{ url_for('add_user') }}">
+        <label for="email">Email:</label>
+        <input type="text" name="email" id="email" required><br>
+
+        <label for="phone_number">Phone Number:</label>
+        <input type="text" name="phone_number" id="phone_number" required><br>
+
+        <!-- Add other form fields as needed -->
+
+        <input type="submit" value="Add User">
+    </form>
+    <a href="{{ url_for('index') }}">Cancel</a>
+</body>
+</html>
