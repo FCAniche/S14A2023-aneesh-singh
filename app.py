@@ -2,10 +2,14 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+
+# Load database URI from .env file
+load_dotenv()
 
 app = Flask(__name__)
-db_uri = "mysql+mysqlconnector://doadmin:AVNS_2waddAANZi9WJGnxFuM@db-mysql-nyc1-63445-do-user-14322151-0.b.db.ondigitalocean.com:25060/defaultdb"
-app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 db = SQLAlchemy(app)
 
 class User(db.Model):
